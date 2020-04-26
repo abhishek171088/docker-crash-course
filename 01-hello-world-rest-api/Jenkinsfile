@@ -1,0 +1,25 @@
+pipeline {
+    agent { docker { image 'node:6.3' } }
+    stages {
+        stage('scm') {
+            steps {
+                git credentialsId: 'e79607cd-aa1f-4a6b-84cd-bc2c42611505', 
+                url: 'https://github.com/abhishek171088/hello-world.git'
+            }
+        }
+        
+        stage('build') {
+            steps {
+                sh label: '', script: 'mvn clean install'
+            }
+        }
+    
+        stage('deploy') {
+            steps {
+                deploy adapters: [tomcat8(credentialsId: 'deployer_user', path: '', 
+                url: 'http://54.81.65.213:8080/')], contextPath: 'hello-world',
+                onFailure: false, war: '**/*.war'
+            }
+        }
+    }
+}
